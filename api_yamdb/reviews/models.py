@@ -1,30 +1,35 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from reviews.validators import year_validate
+from django.urls import reverse
 
 
 User = get_user_model()
 
 
 class GenreCategoryModel(models.Model):
-    """Абстрактная модель. Добавляет дату создания."""
+    """Абстрактная модель. Добавляет наименование и слаг."""
     name = models.CharField(
         'Название',
         max_length=256)
-    slug = models.SlugField('Индетификатор', max_length=50, unique=True)
+    slug = models.SlugField('Индетификатор', max_length=50, unique=True, db_index=True)
 
     class Meta:
         abstract = True
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Genre(GenreCategoryModel):
     """Класс для описания жанров произведений"""
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+
+    def get_absolute_url(self):
+        return reverse('genre_detail', kwargs={'slug': self.slug})
 
 Genre._meta.get_field('name').help_text = ('Название жанра')
 Genre._meta.get_field('slug').help_text = ('Индетификатор жанра')
@@ -32,9 +37,6 @@ Genre._meta.get_field('slug').help_text = ('Индетификатор жанр�
 
 class Category(GenreCategoryModel):
     """Класс для описания категорий произведений"""
-
-    def __str__(self) -> str:
-        return self.name
 
     class Meta:
         verbose_name = 'Категория'
@@ -52,6 +54,7 @@ class Title(models.Model):
         help_text='Название произведения')
     year = models.IntegerField(
         'Год выпуска',
+        validators=[year_validate],
         help_text='Год выпуска произведения')
     description = models.TextField(
         'Описание',
