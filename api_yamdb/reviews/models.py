@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from reviews.validators import year_validate
 from django.urls import reverse
 
+from reviews.validators import score_validate
+
 
 User = get_user_model()
 
@@ -16,6 +18,25 @@ class GenreCategoryModel(models.Model):
 
     class Meta:
         abstract = True
+        
+        
+class ReviewCommentModel(models.Model):
+    """Абстрактаная модель для создания комментариев и обзоров"""
+    text = models.TextField(
+        verbose_name='Текст',
+        help_text='Текст публикации'
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+        help_text='Дата устанавливается автоматически'
+    )
+    
+    class Meta:
+        abstract = True
+        
+    def __str__(self) -> str:
+        return self.text
 
     def __str__(self) -> str:
         return self.name
@@ -81,3 +102,59 @@ class Title(models.Model):
         ordering = ('-year',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+
+
+class Review(ReviewCommentModel):
+    """Модель отзывов"""
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Отзыв',
+        help_text='Отзыв к выбранному произведению'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Автор отзыва',
+    )
+    score = models.PositiveSmallIntegerField(
+        validators=[score_validate],
+        verbose_name='Рейтинг',
+        help_text='Рейтинг произведения'
+    )
+    
+    class Meta:
+        ordering = ('id',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('title', 'author'),
+                name='Unique_review_from_author_for_title'
+            ),
+        )
+        verbose_name = 'Отзыв к произведению'
+        verbose_name_plural = 'Отзывы к произведениям'
+        
+    
+class Comment(ReviewCommentModel):
+    """Модель комментариев"""
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Комментарий',
+        help_text='Комментарий к отзыву'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор комментария'
+    )
+    
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Комментарий к отзыву'
+        verbose_name_plural = 'Комментарии к отзывам'
+        
