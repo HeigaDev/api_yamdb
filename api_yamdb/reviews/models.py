@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from reviews.validators import validate_score
+from reviews.validators import score_validate
 
 
 User = get_user_model()
@@ -117,7 +117,7 @@ class Review(ReviewCommentModel):
         verbose_name='Автор отзыва',
     )
     score = models.PositiveSmallIntegerField(
-        validators=[validate_score],
+        validators=[score_validate],
         verbose_name='Рейтинг',
         help_text='Рейтинг произведения'
     )
@@ -146,7 +146,7 @@ class Comment(ReviewCommentModel):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
         verbose_name='Автор комментария'
     )
     
