@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class GenreCategoryModel(models.Model):
-    """Абстрактная модель. Добавляет наименование и слаг."""
+    """Абстрактная модель для жанров и категорий."""
     name = models.CharField(
         'Название',
         max_length=256)
