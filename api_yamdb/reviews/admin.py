@@ -1,16 +1,6 @@
-from .models import Category, Genre, Title
 from django.contrib import admin
 
-from .models import User
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'email', 'username', 'role', 'bio')
-    search_fields = ('role',)
-    empty_value_display = '-пусто-'
-
-# Register your models here.
+from .models import Category, Genre, Title
 
 
 class TitleAdmin(admin.ModelAdmin):
