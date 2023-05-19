@@ -1,9 +1,6 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from reviews.validators import score_validate, year_validate
-
-
-User = get_user_model()
+from user.models import User
 
 
 class GenreCategoryModel(models.Model):
@@ -46,6 +43,7 @@ class Genre(GenreCategoryModel):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
+
 Genre._meta.get_field('name').help_text = ('Название жанра')
 Genre._meta.get_field('slug').help_text = ('Индетификатор жанра')
 
@@ -56,6 +54,7 @@ class Category(GenreCategoryModel):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
 
 Category._meta.get_field('name').help_text = ('Название категории')
 Category._meta.get_field('slug').help_text = ('Индетификатор категории')
