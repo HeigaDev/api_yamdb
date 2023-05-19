@@ -34,9 +34,9 @@ class RetrieveTitleSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     """Основной сериализатор для остальных методов."""
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(), slug_field='slug')
+        queryset=Category.objects.all(), slug_field='slug', required=True)
     genre = serializers.SlugRelatedField(
-        many=True, queryset=Genre.objects.all(), slug_field='slug')
+        many=True, queryset=Genre.objects.all(), slug_field='slug', required=True)
 
     class Meta:
         model = Title

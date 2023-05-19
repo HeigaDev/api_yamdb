@@ -78,13 +78,13 @@ class Title(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='reviews',
+        related_name='titles',
         verbose_name='Категория',
         help_text='Категория, к которой относится произведение'
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='reviews',
+        related_name='titles',
         verbose_name='Жанр',
         help_text='Жанр, к которому относится произведение'
     )
@@ -136,7 +136,6 @@ class Comment(ReviewCommentModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments',
         verbose_name='Комментарий',
         help_text='Комментарий к отзыву'
     )
