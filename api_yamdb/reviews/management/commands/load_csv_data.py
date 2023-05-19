@@ -48,10 +48,7 @@ def handle_title():
 
 def handle_user():
     for row in DictReader(open('static/data/users.csv')):
-        # Для кастомной модели Юзер - не работают миграции
-        # User.objects.get_or_create(id=row['id'], username=row['username'], email=row['email'], role=row['role'], bio=row['bio'], first_name=row['first_name'], last_name=row['last_name'])
-        # Для дефолтной модели Юзер (auth_user)
-        User.objects.get_or_create(id=row['id'], username=row['username'], email=row['email'])
+        User.objects.get_or_create(id=row['id'], username=row['username'], email=row['email'], role=row['role'], bio=row['bio'], first_name=row['first_name'], last_name=row['last_name'])
 
 def handle_review():
     for row in DictReader(open('static/data/review.csv')):

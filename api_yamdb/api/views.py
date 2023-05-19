@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Genre, Title
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAdmin
 
 from django.contrib.auth.tokens import default_token_generator
 from .utils import sending_mail
@@ -11,13 +11,12 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from user.models import User
+from reviews.models import User
 
-from .permissions import IsAdmin
 from .serializers import (RegisterDataSerializer, TokenSerializer,
                           UserEditSerializer, UserSerializer)
 from .serializers import (CategorySerializer, GenreSerializer,
-                          RetrieveTitleSerializer, TitleSerializer)
+                          GetTitleSerializer, TitleSerializer)
 
 
 @api_view(['POST'])
@@ -101,9 +100,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
-        # Если запрошенное действие — получение одного объекта
-        if self.action == 'retrieve':
-            return RetrieveTitleSerializer
+        # Если запрошенное действие — получение одного объекта или списка
+        if self.action == 'retrieve' or self.action == 'list':
+            return GetTitleSerializer
         return TitleSerializer
 
 

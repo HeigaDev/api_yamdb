@@ -2,7 +2,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Genre, Title
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from user.models import User
+from reviews.models import User
 
 
 class RegisterDataSerializer(serializers.ModelSerializer):
@@ -53,10 +53,10 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class RetrieveTitleSerializer(serializers.ModelSerializer):
+class GetTitleSerializer(serializers.ModelSerializer):
     """
-    Дополнительный сериализатор для действия retrieve:
-    получение экземпляра объекта Title
+    Дополнительный сериализатор для get-действий retrieve и list:
+    получение списка и экземпляра объекта Title
     """
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
