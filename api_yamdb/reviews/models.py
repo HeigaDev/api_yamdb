@@ -1,10 +1,6 @@
 from django.db import models
-from django.contrib.auth import get_user_model
-
 from reviews.validators import score_validate
-
-
-User = get_user_model()
+from user.models import User
 
 
 class GenreCategoryModel(models.Model):
@@ -16,8 +12,8 @@ class GenreCategoryModel(models.Model):
 
     class Meta:
         abstract = True
-        
-        
+
+
 class ReviewCommentModel(models.Model):
     """Абстрактаная модель для создания комментариев и обзоров"""
     text = models.TextField(
@@ -29,10 +25,10 @@ class ReviewCommentModel(models.Model):
         auto_now_add=True,
         help_text='Дата устанавливается автоматически'
     )
-    
+
     class Meta:
         abstract = True
-        
+
     def __str__(self) -> str:
         return self.text
 
@@ -47,6 +43,7 @@ class Genre(GenreCategoryModel):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
+
 Genre._meta.get_field('name').help_text = ('Название жанра')
 Genre._meta.get_field('slug').help_text = ('Индетификатор жанра')
 
@@ -60,6 +57,7 @@ class Category(GenreCategoryModel):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
 
 Category._meta.get_field('name').help_text = ('Название категории')
 Category._meta.get_field('slug').help_text = ('Индетификатор категории')
@@ -121,7 +119,7 @@ class Review(ReviewCommentModel):
         verbose_name='Рейтинг',
         help_text='Рейтинг произведения'
     )
-    
+
     class Meta:
         ordering = ('id',)
         constraints = (
@@ -132,8 +130,8 @@ class Review(ReviewCommentModel):
         )
         verbose_name = 'Отзыв к произведению'
         verbose_name_plural = 'Отзывы к произведениям'
-        
-    
+
+
 class Comment(ReviewCommentModel):
     """Модель комментариев"""
     review = models.ForeignKey(
@@ -149,9 +147,8 @@ class Comment(ReviewCommentModel):
         related_name='comments',
         verbose_name='Автор комментария'
     )
-    
+
     class Meta:
         ordering = ('id',)
         verbose_name = 'Комментарий к отзыву'
         verbose_name_plural = 'Комментарии к отзывам'
-        
