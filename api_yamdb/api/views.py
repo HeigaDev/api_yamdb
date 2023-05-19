@@ -1,21 +1,22 @@
-from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleSerializer)
+from django_filters.rest_framework import DjangoFilterBackend
+
 from reviews.models import Category, Genre, Title
-from rest_framework import mixins
-from rest_framework import filters, permissions, viewsets
+from .permissions import IsAdminOrReadOnly, IsAdmin
+
 from django.contrib.auth.tokens import default_token_generator
 from .utils import sending_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import User
 
-from .permissions import IsAdmin
 from .serializers import (RegisterDataSerializer, TokenSerializer,
                           UserEditSerializer, UserSerializer)
+from .serializers import (CategorySerializer, GenreSerializer,
+                          GetTitleSerializer, TitleSerializer)
 
 
 @api_view(['POST'])
@@ -94,13 +95,40 @@ class UserViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('year', 'name', 'genre__slug', 'category__slug',)
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_serializer_class(self):
+        # Если запрошенное действие — получение одного объекта или списка
+        if self.action == 'retrieve' or self.action == 'list':
+            return GetTitleSerializer
+        return TitleSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class ListCreateDestroyViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """
+    Собственный класс для категорий и жанров.
+    Доступны только методы Post, Delete
+    и Get. Метод Get только для списка объектов.
+    """
+    pass
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (IsAdminOrReadOnly,)

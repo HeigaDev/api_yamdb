@@ -43,18 +43,36 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('__all__')
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('__all__')
+        fields = ('name', 'slug')
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class GetTitleSerializer(serializers.ModelSerializer):
+    """
+    Дополнительный сериализатор для get-действий retrieve и list:
+    получение списка и экземпляра объекта Title
+    """
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
 
     class Meta:
         model = Title
-        fields = ('__all__')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Основной сериализатор для остальных методов."""
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(), slug_field='slug', required=True)
+    genre = serializers.SlugRelatedField(
+        many=True, queryset=Genre.objects.all(), slug_field='slug', required=True)
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
