@@ -8,7 +8,10 @@ class GenreCategoryModel(models.Model):
     name = models.CharField(
         'Название',
         max_length=256)
-    slug = models.SlugField('Индетификатор', max_length=50, unique=True, db_index=True)
+    slug = models.SlugField('Индетификатор',
+                            max_length=50,
+                            unique=True,
+                            db_index=True)
 
     class Meta:
         abstract = True
@@ -135,6 +138,7 @@ class Comment(ReviewCommentModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
+        related_name='comments',
         verbose_name='Комментарий',
         help_text='Комментарий к отзыву'
     )

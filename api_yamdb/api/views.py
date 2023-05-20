@@ -1,7 +1,9 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
 
-from reviews.models import Category, Genre, Title
-from .permissions import IsAdminOrReadOnly, IsAdmin
+from reviews.models import Category, Genre, Review, Title
+from .permissions import (IsAdminOrReadOnly, IsAdmin,
+                          IsAdminModeratorOwnerOrReadOnly)
 
 from django.contrib.auth.tokens import default_token_generator
 from .utils import sending_mail
@@ -13,10 +15,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import User
 
-from .serializers import (RegisterDataSerializer, TokenSerializer,
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, GetTitleSerializer,
+                          ReviewSerializer, RegisterDataSerializer,
+                          TokenSerializer, TitleSerializer,
                           UserEditSerializer, UserSerializer)
-from .serializers import (CategorySerializer, GenreSerializer,
-                          GetTitleSerializer, TitleSerializer)
 
 
 @api_view(['POST'])
@@ -105,9 +108,26 @@ class TitleViewSet(viewsets.ModelViewSet):
             return GetTitleSerializer
         return TitleSerializer
 
+    def list(self, request):
+        queryset = self.filter_queryset(Title.objects.annotate(
+            rating=Avg('reviews__score')))
+        serializer = GetTitleSerializer(queryset, many=True)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
-class ListCreateDestroyViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
-                        mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    def retrieve(self, request, pk=None):
+        queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = GetTitleSerializer(user)
+        return Response(serializer.data)
+
+
+class ListCreateDestroyViewSet(mixins.ListModelMixin,
+                               mixins.CreateModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
     """
     Собственный класс для категорий и жанров.
     Доступны только методы Post, Delete
@@ -132,3 +152,35 @@ class GenreViewSet(ListCreateDestroyViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     permission_classes = (IsAdminOrReadOnly,)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAdminModeratorOwnerOrReadOnly, ]
+
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id'),
+            title__id=self.kwargs.get("title_id"))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user, review=review)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAdminModeratorOwnerOrReadOnly, ]
+
+    def get_title(self):
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
+
+    def get_queryset(self):
+        return Review.objects.filter(title=self.get_title().id)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title())
