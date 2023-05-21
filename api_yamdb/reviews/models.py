@@ -1,4 +1,5 @@
 from django.db import models
+
 from reviews.validators import score_validate, year_validate
 from user.models import User
 
