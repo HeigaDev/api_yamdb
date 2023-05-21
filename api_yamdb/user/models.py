@@ -36,6 +36,12 @@ class User(AbstractUser):
         null=True,
         blank=True
     )
+    confirmation_code = models.CharField(
+        verbose_name='Код подтверждения',
+        max_length=100,
+        null=True,
+        unique=True
+    )
 
     @property
     def is_moderator(self):

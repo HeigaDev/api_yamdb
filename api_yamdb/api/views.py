@@ -4,6 +4,7 @@ from django.db.models import Avg
 from reviews.models import Category, Genre, Review, Title
 from .permissions import (IsAdminOrReadOnly, IsAdmin,
                           IsAdminModeratorOwnerOrReadOnly)
+from .filters import TitleFilter
 
 from django.contrib.auth.tokens import default_token_generator
 from .utils import sending_mail
@@ -116,8 +117,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filterset_class = TitleFilter
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('year', 'name', 'genre__slug', 'category__slug',)
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
@@ -180,7 +181,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(
             Review,
             id=self.kwargs.get('review_id'),
-            title__id=self.kwargs.get("title_id"))
+            title__id=self.kwargs.get('title_id'))
         return review.comments.all()
 
     def perform_create(self, serializer):
