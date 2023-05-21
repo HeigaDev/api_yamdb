@@ -18,3 +18,19 @@ def score_validate(value):
             'Вы можете поставить оценку от 1 до 10 баллов'
         )
     return value
+
+
+def email_validate(value):
+    if not (0 < len(value) <= 254):
+        raise ValidationError(
+            'Содержимое поля email не должно быть длиннее 254 символа'
+        )
+    return value
+
+
+def username_validate(value):
+    if not (0 < len(value) <= 150):
+        raise ValidationError(
+            'Содержимое поля username не должно быть длиннее 150 символов'
+        )
+    return value
