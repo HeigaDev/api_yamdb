@@ -27,11 +27,13 @@ from .serializers import (CategorySerializer, CommentSerializer,
 @permission_classes([permissions.AllowAny])
 def register(request):
     serializer = RegisterDataSerializer(data=request.data)
-    if User.objects.filter(username=serializer.initial_data.get('username')).exists():
+    if User.objects.filter(
+            username=serializer.initial_data.get('username')).exists():
         user = User.objects.get(username=serializer.initial_data['username'])
         if user.email != serializer.initial_data.get('email'):
-            return Response({'detail': 'User with this username already exists.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'User with this username already exists.'},
+                status=status.HTTP_400_BAD_REQUEST)
         sending_mail(user)
         return Response({'detail': 'User with this username already exists.'},
                         status=status.HTTP_200_OK)
