@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import RegexValidator
 from django.db import models
-
-from user.validators import check_username
 
 
 class User(AbstractUser):
@@ -25,8 +23,7 @@ class User(AbstractUser):
         verbose_name='Имя пользователя',
         max_length=150,
         unique=True,
-        validators=[UnicodeUsernameValidator(),
-                    check_username]
+        validators=[RegexValidator(r'^[\w.@+-]+\Z')]
     )
     role = models.CharField(
         verbose_name='Роль',
