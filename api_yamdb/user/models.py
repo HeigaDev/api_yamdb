@@ -15,12 +15,12 @@ class User(AbstractUser):
 
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
+        max_length=254,
         unique=True,
     )
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
-        null=True,
         unique=True,
     )
     role = models.CharField(
@@ -33,6 +33,12 @@ class User(AbstractUser):
         verbose_name='О себе',
         null=True,
         blank=True
+    )
+    confirmation_code = models.CharField(
+        verbose_name='Код подтверждения',
+        max_length=100,
+        null=True,
+        unique=True
     )
 
     @property
