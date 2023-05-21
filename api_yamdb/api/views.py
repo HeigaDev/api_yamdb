@@ -26,17 +26,19 @@ from .serializers import (CategorySerializer, CommentSerializer,
 @permission_classes([permissions.AllowAny])
 def register(request):
     serializer = RegisterDataSerializer(data=request.data)
-    if User.objects.filter(username=serializer.initial_data['username']).exists():
-        user = get_object_or_404(
-            User,
-            username=serializer.initial_data['username']
-        )
+    if User.objects.filter(username=serializer.initial_data.get('username')).exists():
+        user = User.objects.get(username=serializer.initial_data['username'])
+        if user.email != serializer.initial_data.get('email'):
+            return Response({'detail': 'User with this username already exists.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         sending_mail(user)
+        return Response({'detail': 'User with this username already exists.'},
+                        status=status.HTTP_200_OK)
     serializer.is_valid(raise_exception=True)
     serializer.save()
     user = get_object_or_404(
         User,
-        username=serializer.validated_data['username']
+        username=serializer.validated_data.get('username')
     )
     sending_mail(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -67,6 +69,22 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         methods=[
