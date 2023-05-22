@@ -1,7 +1,6 @@
 from django.db.models import Avg
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
-from .utils import sending_mail
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -12,15 +11,15 @@ from rest_framework_simplejwt.tokens import AccessToken
 from .filters import TitleFilter
 from .permissions import (IsAdminOrReadOnly, IsAdmin,
                           IsAdminModeratorOwnerOrReadOnly)
-
-from reviews.models import Category, Genre, Review, Title
-
-from reviews.models import User
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetTitleSerializer,
                           ReviewSerializer, RegisterDataSerializer,
                           TokenSerializer, TitleSerializer,
                           UserEditSerializer, UserSerializer)
+
+from .utils import sending_mail
+
+from reviews.models import Category, Genre, Review, Title, User
 
 
 @api_view(['POST'])
