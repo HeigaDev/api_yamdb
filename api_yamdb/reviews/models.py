@@ -42,26 +42,36 @@ class ReviewCommentModel(models.Model):
 
 class Genre(GenreCategoryModel):
     """Класс для описания жанров произведений"""
+    name = models.CharField(
+        'Название',
+        max_length=256,
+        help_text=('Название жанра'))
+    slug = models.SlugField('Индетификатор',
+                            max_length=50,
+                            unique=True,
+                            db_index=True,
+                            help_text=('Индетификатор жанра'))
 
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
 
-Genre._meta.get_field('name').help_text = ('Название жанра')
-Genre._meta.get_field('slug').help_text = ('Индетификатор жанра')
-
-
 class Category(GenreCategoryModel):
     """Класс для описания категорий произведений"""
+    name = models.CharField(
+        'Название',
+        max_length=256,
+        help_text=('Название категории'))
+    slug = models.SlugField('Индетификатор',
+                            max_length=50,
+                            unique=True,
+                            db_index=True,
+                            help_text=('Индетификатор категории'))
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-
-
-Category._meta.get_field('name').help_text = ('Название категории')
-Category._meta.get_field('slug').help_text = ('Индетификатор категории')
 
 
 class Title(models.Model):
