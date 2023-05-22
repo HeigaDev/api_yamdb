@@ -25,17 +25,17 @@ from reviews.models import Category, Genre, Review, Title, User
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def register(request):
-    serializer = RegisterDataSerializer(data=request.data)
     if User.objects.filter(
-            username=serializer.initial_data.get('username')).exists():
-        user = User.objects.get(username=serializer.initial_data['username'])
-        if user.email != serializer.initial_data.get('email'):
+            username=request.data.get('username')).exists():
+        user = User.objects.get(username=request.data.get('username'))
+        if user.email != request.data.get('email'):
             return Response(
                 {'detail': 'User with this username already exists.'},
                 status=status.HTTP_400_BAD_REQUEST)
         sending_mail(user)
         return Response({'detail': 'User with this username already exists.'},
                         status=status.HTTP_200_OK)
+    serializer = RegisterDataSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     serializer.save()
     user = get_object_or_404(
