@@ -4,23 +4,6 @@ from reviews.validators import score_validate, year_validate
 from user.models import User
 
 
-class GenreCategoryModel(models.Model):
-    """Абстрактная модель для жанров и категорий."""
-    name = models.CharField(
-        'Название',
-        max_length=256)
-    slug = models.SlugField('Индетификатор',
-                            max_length=50,
-                            unique=True,
-                            db_index=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class ReviewCommentModel(models.Model):
     """Абстрактаная модель для создания комментариев и обзоров"""
     text = models.TextField(
@@ -40,7 +23,7 @@ class ReviewCommentModel(models.Model):
         return self.text
 
 
-class Genre(GenreCategoryModel):
+class Genre(models.Model):
     """Класс для описания жанров произведений"""
     name = models.CharField(
         'Название',
@@ -56,8 +39,11 @@ class Genre(GenreCategoryModel):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
+    def __str__(self) -> str:
+        return self.name
 
-class Category(GenreCategoryModel):
+
+class Category(models.Model):
     """Класс для описания категорий произведений"""
     name = models.CharField(
         'Название',
@@ -72,6 +58,9 @@ class Category(GenreCategoryModel):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Title(models.Model):

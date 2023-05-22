@@ -1,8 +1,11 @@
-from csv import DictReader
+import csv
+
 from django.core.management import BaseCommand
 
 from reviews.models import Category, Genre, Title, User, Review, Comment
 
+
+MODELS = [Category, Genre, Title, User, Review, Comment]
 
 ALREDY_LOADED_ERROR_MESSAGE = """
 If you need to reload the csv data from the CSV file,
@@ -15,10 +18,11 @@ class Command(BaseCommand):
     help = 'Loads data from csv files'
 
     def handle(self, *args, **options):
-        if Category.objects.exists():
-            print('category data already loaded...exiting.')
-            print(ALREDY_LOADED_ERROR_MESSAGE)
-            return
+        for Model in MODELS:
+            if Model.objects.exists():
+                print('category data already loaded...exiting.')
+                print(ALREDY_LOADED_ERROR_MESSAGE)
+                return
         print('Loading category data')
         handle_category()
         handle_genre()
@@ -29,54 +33,74 @@ class Command(BaseCommand):
 
 
 def handle_category():
-    for row in DictReader(open('static/data/category.csv')):
-        Category.objects.get_or_create(id=row['id'],
-                                       name=row['name'],
-                                       slug=row['slug'])
+    with open(('static/data/category.csv'), mode='r') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        for row in reader:
+            object_dict = {
+                key: value
+                for key, value in zip(header, row)
+            }
+            Category.objects.create(**object_dict)
 
 
 def handle_genre():
-    for row in DictReader(open('static/data/genre.csv')):
-        Genre.objects.get_or_create(id=row['id'],
-                                    name=row['name'],
-                                    slug=row['slug'])
+    with open(('static/data/genre.csv'), mode='r') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        for row in reader:
+            object_dict = {
+                key: value
+                for key, value in zip(header, row)
+            }
+            Genre.objects.create(**object_dict)
 
 
 def handle_title():
-    for row in DictReader(open('static/data/titles.csv')):
-        Title.objects.get_or_create(id=row['id'],
-                                    name=row['name'],
-                                    year=row['year'],
-                                    category_id=row['category'])
-    for row in DictReader(open('static/data/genre_title.csv')):
-        Title.objects.get(id=row['title_id']).genre.add(row['genre_id'])
+    with open(('static/data/titles.csv'), mode='r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            Title.objects.get_or_create(id=row['id'],
+                                        name=row['name'],
+                                        year=row['year'],
+                                        category_id=row['category'])
+        with open(('static/data/genre_title.csv'), mode='r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                Title.objects.get(
+                    id=row['title_id']).genre.add(row['genre_id'])
 
 
 def handle_user():
-    for row in DictReader(open('static/data/users.csv')):
-        User.objects.get_or_create(id=row['id'],
-                                   username=row['username'],
-                                   email=row['email'],
-                                   role=row['role'],
-                                   bio=row['bio'],
-                                   first_name=row['first_name'],
-                                   last_name=row['last_name'])
+    with open(('static/data/users.csv'), mode='r') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        for row in reader:
+            object_dict = {
+                key: value
+                for key, value in zip(header, row)
+            }
+            User.objects.create(**object_dict)
 
 
 def handle_review():
-    for row in DictReader(open('static/data/review.csv')):
-        Review.objects.get_or_create(id=row['id'],
-                                     title_id=row['title_id'],
-                                     text=row['text'],
-                                     author_id=row['author'],
-                                     score=row['score'],
-                                     pub_date=row['pub_date'])
+    with open(('static/data/review.csv'), mode='r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            Review.objects.get_or_create(id=row['id'],
+                                         title_id=row['title_id'],
+                                         text=row['text'],
+                                         author_id=row['author'],
+                                         score=row['score'],
+                                         pub_date=row['pub_date'])
 
 
 def handle_comments():
-    for row in DictReader(open('static/data/comments.csv')):
-        Comment.objects.get_or_create(id=row['id'],
-                                      review_id=row['review_id'],
-                                      text=row['text'],
-                                      author_id=row['author'],
-                                      pub_date=row['pub_date'])
+    with open(('static/data/comments.csv'), mode='r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            Comment.objects.get_or_create(id=row['id'],
+                                          review_id=row['review_id'],
+                                          text=row['text'],
+                                          author_id=row['author'],
+                                          pub_date=row['pub_date'])
